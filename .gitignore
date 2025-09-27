@@ -1,0 +1,19 @@
+# Python virtual env (backend)
+backend/venv/
+backend/.venv/
+
+# Python cache
+backend/__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Env files (backend)
+backend/.env
+backend/.env.local
+
+# System files
+.DS_Store
+*.log
+*.sqlite3
+.env
+.env.*
