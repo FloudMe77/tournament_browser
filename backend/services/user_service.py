@@ -4,7 +4,7 @@ from schemas.user import User, UserUpdate
 import supabase
 from schemas.login_form import Login_form
 from fastapi import Header, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
 TABLE_NAME = "users"
 
@@ -21,7 +21,7 @@ def login_user(supabase_client: Client, data: Login_form):
         })
         
         session = auth.session
-        response = RedirectResponse(url="/auth/me", status_code=303)
+        response = JSONResponse(content={"message": "Zalogowano"})
         response.set_cookie("access_token", session.access_token, httponly=True, secure=False)
         response.set_cookie("refresh_token", session.refresh_token, httponly=True, secure=False)
         return response
@@ -29,19 +29,18 @@ def login_user(supabase_client: Client, data: Login_form):
         raise HTTPException(status_code=400, detail=str(e))
     
 
-def register_user(db:Client, data: Login_form):
+def register_user(db: Client, data: Login_form):
     try:
         auth = db.auth.sign_up({
-                "email" : data.email,
-                "password" : data.password
-            }
-        )
+            "email": data.email,
+            "password": data.password
+        })
         session = auth.session
-        response = RedirectResponse(url="/auth/me", status_code=303)
+        response = JSONResponse(content={"message": "Konto utworzone i zalogowane"})
         response.set_cookie("access_token", session.access_token, httponly=True, secure=False)
         response.set_cookie("refresh_token", session.refresh_token, httponly=True, secure=False)
         return response
-        
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

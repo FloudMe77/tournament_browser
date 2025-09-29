@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, Cookie
+from fastapi import APIRouter, Depends, HTTPException, Header, Cookie, Form
 from fastapi.responses import RedirectResponse
 import services.user_service as us
 from schemas.user import User, UserUpdate
@@ -32,14 +32,15 @@ def get_current_user(
 def edit(payload: UserUpdate, db=Depends(get_db)):
     return us.edit_user_details(db, payload, get_current_user())
 
-
 @router.post("/login")
-def login(login: Login_form, db=Depends(get_db)):
-    return us.login_user(db, login)
+def login_user(email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
+    login_data = Login_form(email=email, password=password)
+    return us.login_user(db, login_data)
 
 @router.post("/register")
-def register(login: Login_form, db=Depends(get_db)):
-    return us.register_user(db, login)
+def register(email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
+    login_data = Login_form(email=email, password=password)
+    return us.register_user(db, login_data)
 
 @router.api_route("/me", methods=["GET", "POST"])
 def me(user=Depends(get_current_user)):

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from endpoints import user_auth
+import front
 
 app = FastAPI(
     title="Tornament Browser API",
@@ -8,6 +9,8 @@ app = FastAPI(
 )
 
 app.include_router(user_auth.router, prefix="/auth", tags=["Authentication"])
+
+app.include_router(front.router, prefix="/front", tags=["Frontend"])
 
 @app.get("/")
 def root():
