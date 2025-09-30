@@ -8,6 +8,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 
 TABLE_NAME = "users"
 
+
 def list_all_users(db: Client):
     data =  db.table(TABLE_NAME).select("*").execute()
     print(data)
@@ -44,7 +45,20 @@ def register_user(db: Client, data: Login_form):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-def edit_user_details(db:Client, payload:UserUpdate, current_user):
+def edit_user_details(db: Client, payload: UserUpdate, current_user):
     data = {k: v for k, v in payload.model_dump().items() if v is not None}
-    response = db.table(TABLE_NAME).update(data).eq("id", current_user.id).execute()
-    return {"status": "ok", "update":response.data}
+    
+    check = db.table(TABLE_NAME).select("*").eq("user_id", current_user.id).execute()
+    
+    if not check.data:
+        return {"status": "error", "message": "User not found"}
+    
+    response = (
+        db.table(TABLE_NAME)
+        .update(data)
+        .eq("user_id", current_user.id)
+        .execute()
+    )
+    
+    return {"status": "ok", "update": response.data}
+

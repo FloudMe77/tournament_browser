@@ -6,6 +6,9 @@
   </head>
   <body>
     <main>
+      {% if message %}
+        <p style="color: red;">{{ message }}</p>
+      {% endif %}
         <h1>Login form</h1>  
             <form method="post" action="/front/login">
                 <input value="{{email}}" type="text" name="email" placeholder="Wpisz email">
