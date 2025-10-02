@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Dwa panele z listą i suwakiem</title>
+  <style>
+    .bottom_body {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px;
+      font-family: sans-serif;
+    }
+    .panel {
+      width: 20%;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    select {
+      width: 100%;
+      height: 120px;
+    }
+  </style>
+</head>
+<body>
+    {% if message %}
+        <div style="background-color: #ffe5e5; color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+            {{ message }}
+        </div>
+    {% endif %}
+    <div class="bottom_body" >
+  <!-- Lewy panel -->
+  <div class="panel">
+    <h3>Lewa lista</h3>
+    <label>Prośby o dodanie do znajomych</label>
+    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+        <ul style="list-style-type: none; padding: 0; margin: 0;">
+            {% for username in request_invite %}
+                <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>{{ username }}</span>
+                    <form method="post" action="/menu/accept" style="margin: 0;">
+                        <input type="hidden" name="username_to_accept" value="{{ username }}">
+                        <button type="submit">Akceptuj</button>
+                    </form>
+                    <form method="post" action="/menu/reject" style="margin: 0;">
+                        <input type="hidden" name="username_to_accept" value="{{ username }}">
+                        <button type="submit">Odrzuć</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <br><br>
+
+    <label>Lista znajomych</label>
+    <select multiple>
+      {% for username in friends %}
+        <option>{{ username }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Prawy panel -->
+  <div class="panel">
+    <h3>Prawa lista</h3>
+
+    <label>Zaproszenia do znajomych</label>
+    <select multiple>
+      {% for username in your_invitation %}
+        <option>{{ username }}</option>
+      {% endfor %}
+    </select>
+    <br><br>
+
+    <label>Zaproś znajomego</label>
+    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+        <ul style="list-style-type: none; padding: 0; margin: 0;">
+            {% for username in search_friend_list %}
+                <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>{{ username }}</span>
+                    <form method="post" action="/menu/invite" style="margin: 0;">
+                        <input type="hidden" name="username_to_invite" value="{{ username }}">
+                        <button type="submit">Zaproś</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <form method="post" action="/menu">
+      
+      <input value="{{ username_search or '' }}" type="text" name="username_search" placeholder="Wpisz nazwę użytkownika">
+      <button type="submit">Szukaj</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from endpoints import user_auth
+from endpoints import user_auth, menu
 import front
 
 app = FastAPI(
@@ -8,9 +8,9 @@ app = FastAPI(
     version="0.0.1"
 )
 
-app.include_router(user_auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(user_auth.router, prefix="/user", tags=["User"])
+app.include_router(menu.router, prefix="/menu", tags=["Menu"])
 
-app.include_router(front.router, prefix="/front", tags=["Frontend"])
 
 @app.get("/")
 def root():

@@ -1,47 +1,101 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, Cookie, Form
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Request, Form, Depends, HTTPException, Cookie
+from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
 import services.user_service as us
-from schemas.user import User, UserUpdate
 from schemas.login_form import Login_form
 from db.supabase import get_db
+from utils.auth import get_current_user
 
 router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
-def get_current_user(
-    access_token: str = Cookie(None),
-    refresh_token: str = Cookie(None),
-    db = Depends(get_db)
-):
-    if not access_token:
-        raise HTTPException(status_code=401, detail="Brak access_token")
+@router.get("/login", response_class=HTMLResponse)
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
+@router.post("/login", response_class=HTMLResponse)
+def login_page_post(request: Request, email: str = Form(...), password: str = Form(...), db = Depends(get_db)):
     try:
-        user = db.auth.get_user(access_token)
-        return user.user
-    except Exception:
-        if refresh_token:
-            session = db.auth.refresh_session({"refresh_token": refresh_token})
-            new_access = session.session.access_token
-            user = db.auth.get_user(new_access)
-            return user.user
-
-        raise HTTPException(status_code=401, detail="Sesja wygasła")
+        return us.login_user(Login_form(email=email, password=password), db)
+    except Exception as e:
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "message": f"Błąd logowania: {str(e)}"
+        })
     
+@router.get("/register", response_class=HTMLResponse)
+def register_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
-@router.post("/edit")
-def edit(payload: UserUpdate, db=Depends(get_db)):
-    return us.edit_user_details(db, payload, get_current_user())
+@router.post("/register", response_class=HTMLResponse)
+def register_page_post(request: Request, email: str = Form(...), password: str = Form(...), db = Depends(get_db)):
+    try:
+        return us.register_user(Login_form(email=email, password=password), db)
+    except Exception as e:
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "message": f"Błąd logowania: {str(e)}"
+            })
 
-@router.post("/login")
-def login_user(email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
-    login_data = Login_form(email=email, password=password)
-    return us.login_user(db, login_data)
+@router.get("/edit", response_class=HTMLResponse)
+def edit_page(request: Request, current_user = Depends(get_current_user)):
+    return templates.TemplateResponse("edit.html", {
+        "request": request,
+        "message": "",
+        "email": current_user.email,
+        "username": getattr(current_user, 'username', ''),
+        "avatar_url": getattr(current_user, 'avatar_url', '')
+    })
 
-@router.post("/register")
-def register(email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
-    login_data = Login_form(email=email, password=password)
-    return us.register_user(db, login_data)
+@router.post("/edit", response_class=HTMLResponse)
+def edit_page_post(
+    request: Request,
+    email: str = Form(None),
+    username: str = Form(None),
+    avatar_url: str = Form(None),
+    db = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    try:
+        update_data = {}
+        if email and email.strip(): update_data["email"] = email.strip()
+        if username and username.strip(): update_data["username"] = username.strip()
+        if avatar_url and avatar_url.strip(): update_data["avatar_url"] = avatar_url.strip()
 
-@router.api_route("/me", methods=["GET", "POST"])
-def me(user=Depends(get_current_user)):
-    return {"email": user.email, "id": user.id}
+        if not update_data:
+            return templates.TemplateResponse("edit.html", {
+                "request": request,
+                "message": "Nie wprowadzono żadnych zmian",
+                "email": current_user.email,
+                "username": getattr(current_user, 'username', ''),
+                "avatar_url": getattr(current_user, 'avatar_url', '')
+            })
+
+        from schemas.user import UserUpdate
+        payload = UserUpdate(**update_data)
+        result = us.edit_user_details(db, payload, current_user)
+
+        return templates.TemplateResponse("edit.html", {
+            "request": request,
+            "message": "Dane zostały zaktualizowane pomyślnie",
+            "email": update_data.get("email", current_user.email),
+            "username": update_data.get("username", getattr(current_user, 'username', '')),
+            "avatar_url": update_data.get("avatar_url", getattr(current_user, 'avatar_url', ''))
+        })
+
+    except HTTPException as e:
+        return templates.TemplateResponse("edit.html", {
+            "request": request,
+            "message": e.detail,
+            "email": current_user.email,
+            "username": getattr(current_user, 'username', ''),
+            "avatar_url": getattr(current_user, 'avatar_url', '')
+        })
+    except Exception as e:
+        return templates.TemplateResponse("edit.html", {
+            "request": request,
+            "message": f"Wystąpił błąd: {str(e)}",
+            "email": current_user.email,
+            "username": getattr(current_user, 'username', ''),
+            "avatar_url": getattr(current_user, 'avatar_url', '')
+        })

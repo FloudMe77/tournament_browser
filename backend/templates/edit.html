@@ -6,13 +6,13 @@
   </head>
   <body>
     <main>
-      <h1>Edytuj profil</h1>
+      <h1>WYJEBAŁO SIE</h1>
 
       {% if message %}
         <p style="color: red;">{{ message }}</p>
       {% endif %}
 
-      <form method="post" action="/front/edit">
+      <form method="post" action="/user/edit">
         <input value="{{ email or '' }}" type="text" name="email" placeholder="Wpisz email">
         <input value="{{ username or '' }}" type="text" name="username" placeholder="Wpisz username">
         <input value="{{ avatar_url or '' }}" type="text" name="avatar_url" placeholder="Wpisz avatar_url">
