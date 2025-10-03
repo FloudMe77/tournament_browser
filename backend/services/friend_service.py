@@ -3,7 +3,6 @@ from supabase import Client
 from repositories.user_repository import UserRepository
 from repositories.friend_repository import FriendRepository
 
-TABLE_FRIEND = "friendship_request"
 
 def get_friend_list(db: Client, current_user) -> Dict[str, Any]:
     repo = FriendRepository(db)

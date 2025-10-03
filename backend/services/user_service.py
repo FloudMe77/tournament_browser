@@ -8,6 +8,8 @@ from fastapi.responses import RedirectResponse
 from repositories.user_repository import UserRepository
 
 
+
+
 def get_user_name(db: Client, id: str) -> Dict[str, Any]:
     repo = UserRepository(db)
     username = repo.get_username_by_id(id)
@@ -24,7 +26,7 @@ def get_user_id_from_name(db: Client, name: str) -> str:
     return user_id
 
 
-def list_all_users(db: Client) -> List[Dict[str, Any]]:
+def user_exist(db: Client) -> List[Dict[str, Any]]:
     repo = UserRepository(db)
     return repo.list_all()
 

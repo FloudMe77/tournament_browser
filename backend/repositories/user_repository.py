@@ -48,3 +48,4 @@ class UserRepository:
             .execute()
         )
         return [row["username"] for row in (response.data or [])] 
+    

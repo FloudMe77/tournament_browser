@@ -8,14 +8,17 @@ from utils.auth import get_current_user
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
+def safe_get(fn, *args, **kwargs):
+        try:
+            return fn(*args, **kwargs).get("get", [])
+        except Exception as e:
+            return [e.__str__]
 
 def get_menu_context(db, current_user, message=None, search_friend_list=None):
-    """Pobiera wszystkie dane potrzebne do wyświetlenia menu."""
     return {
-        "request_invite": fs.get_invitation_created_for_user(db, current_user)["get"],
-        "friends": fs.get_friend_list(db, current_user)["get"],
-        "your_invitation": fs.get_invitation_created_by_user(db, current_user)["get"],
+        "request_invite": safe_get(fs.get_invitation_created_for_user, db, current_user),
+        "friends": safe_get(fs.get_friend_list, db, current_user),
+        "your_invitation": safe_get(fs.get_invitation_created_by_user, db, current_user),
         "search_friend_list": search_friend_list or [],
         "message": message,
     }
@@ -37,7 +40,7 @@ def menu_page(request: Request, db=Depends(get_db), current_user=Depends(get_cur
 def menu_page_with_search(request: Request, username_search: str = Form(...),
                           db=Depends(get_db), current_user=Depends(get_current_user)):
     try:
-        search_results = us.get_like_list_users(db, username_search, current_user)["get"]
+        search_results = safe_get(us.get_like_list_users,db, username_search, current_user)
         context = get_menu_context(db, current_user, search_friend_list=search_results)
         return templates.TemplateResponse("menu.html", {"request": request, **context})
     except Exception as e:

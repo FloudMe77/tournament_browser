@@ -80,7 +80,6 @@ def edit_page_post(
         payload = UserUpdate(**update_data)
         us.edit_user_details(db, payload, current_user)
 
-        # refresh view context with updated values
         context = build_edit_context(current_user)
         context.update({
             "message": "Dane zostały zaktualizowane pomyślnie",

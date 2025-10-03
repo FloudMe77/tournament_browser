@@ -27,22 +27,47 @@
             {{ message }}
         </div>
     {% endif %}
-    <div class="bottom_body" >
+
+    <!-- <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;"> -->
+    <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
+        <div style="flex: 1;">Data startu</div>
+        <div style="flex: 2;">Nazwa</div>
+        <div style="flex: 1;">Publiczny?</div>
+        <div style="flex: 1;"></div>
+    </div>
+
+    <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
+        <div style="flex: 1;">{{ tournament_data.start_date }}</div>
+        <div style="flex: 2;">{{ tournament_data.name }}</div>
+        <div style="flex: 1;">{{ 'Tak' if tournament_data.public else 'Nie' }}</div>
+        <div style="flex: 1;">
+        </div>
+    </div>
+
+
+    <h1>Edit tournament data</h1>  
+    <form method="POST" action="/tournament/{{ tournament_data.id }}/update" >
+        <input value="{{ new_name }}" type="text" name="name" placeholder="{{tournament_data.name}}">
+        <input value="{{ new_start_date_str }}" type="datetime-local" name="start_date" >
+        <label>
+            <input type="checkbox" name="public" {% if public %}checked{% endif %}>
+            Publiczny
+        </label>
+        <button type="submit">Zapisz</button>
+    </form>
+
+   <div class="bottom_body" >
   <!-- Lewy panel -->
   <div class="panel">
-    <label>Prośby o dodanie do znajomych</label>
+    <label>Uczestnicy turnieju</label>
     <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
         <ul style="list-style-type: none; padding: 0; margin: 0;">
-            {% for username in request_invite %}
+            {% for username in participants %}
                 <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>{{ username }}</span>
-                    <form method="post" action="/menu/accept" style="margin: 0;">
-                        <input type="hidden" name="username_to_accept" value="{{ username }}">
-                        <button type="submit">Akceptuj</button>
-                    </form>
-                    <form method="post" action="/menu/reject" style="margin: 0;">
-                        <input type="hidden" name="username_to_accept" value="{{ username }}">
-                        <button type="submit">Odrzuć</button>
+                    <form method="post" action="/tournament/{{tournament_data.id}}/delate_user" style="margin: 0;">
+                        <input type="hidden" name="username_to_delete" value="{{ username }}">
+                        <button type="submit">Usuń</button>
                     </form>
                 </li>
             {% endfor %}
@@ -50,12 +75,6 @@
     </div>
     <br><br>
 
-    <label>Lista znajomych</label>
-    <select multiple>
-      {% for username in friends %}
-        <option>{{ username }}</option>
-      {% endfor %}
-    </select>
   </div>
 
   <!-- Prawy panel -->
@@ -63,7 +82,7 @@
 
     <label>Wysłane zaproszenia</label>
     <select multiple>
-      {% for username in your_invitation %}
+      {% for username in invitations_send %}
         <option>{{ username }}</option>
       {% endfor %}
     </select>
@@ -72,10 +91,10 @@
     <label>Zaproś znajomego</label>
     <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
         <ul style="list-style-type: none; padding: 0; margin: 0;">
-            {% for username in search_friend_list %}
+            {% for username in search_results %}
                 <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>{{ username }}</span>
-                    <form method="post" action="/menu/invite" style="margin: 0;">
+                    <form method="post" action="/tournament/{{ tournament_data.id }}/invite" style="margin: 0;">
                         <input type="hidden" name="username_to_invite" value="{{ username }}">
                         <button type="submit">Zaproś</button>
                     </form>
@@ -84,7 +103,7 @@
         </ul>
     </div>
 
-    <form method="post" action="/menu">
+    <form method="get" action="/tournament/{{ tournament_data.id }}">
       
       <input value="{{ username_search or '' }}" type="text" name="username_search" placeholder="Wpisz nazwę użytkownika">
       <button type="submit">Szukaj</button>

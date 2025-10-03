@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from endpoints import user_auth, menu
+from endpoints import user_auth, menu, tournament
 import front
 
 app = FastAPI(
@@ -10,6 +10,7 @@ app = FastAPI(
 
 app.include_router(user_auth.router, prefix="/user", tags=["User"])
 app.include_router(menu.router, prefix="/menu", tags=["Menu"])
+app.include_router(tournament.router, prefix="/tournament", tags=["Tournament"])
 
 
 @app.get("/")

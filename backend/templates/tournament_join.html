@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Dwa panele z listą i suwakiem</title>
+  <style>
+    .bottom_body {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px;
+      font-family: sans-serif;
+    }
+    .panel {
+      width: 20%;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    select {
+      width: 100%;
+      height: 120px;
+    }
+  </style>
+</head>
+<body>
+    {% if message %}
+        <div style="background-color: #ffe5e5; color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
+            {{ message }}
+        </div>
+    {% endif %}
+    <h1>Zaproszenia</h1>  
+  <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+    <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
+        <div style="flex: 1;">Data startu</div>
+        <div style="flex: 2;">Nazwa</div>
+        <div style="flex: 1;">Akcja</div>
+    </div>
+
+    {% for tournament in invatation_tournament%}
+    <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
+        <div style="flex: 1;">{{ tournament.start_date }}</div>
+        <div style="flex: 2;">{{ tournament.tournament_name }}</div>
+        <div style="flex: 1;">
+            <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
+                <button type="submit">Dołącz</button>
+            </form>
+            <form method="post" action="/tournament_list/{{ tournament.id }}/reject" style="margin: 0;">
+                <button type="submit">Odrzuć</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+    <h1>Publiczne</h1>  
+  <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+    <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
+        <div style="flex: 1;">Data startu</div>
+        <div style="flex: 2;">Nazwa</div>
+        <div style="flex: 1;"></div>
+    </div>
+
+    {% for tournament in public_tournament %}
+    <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
+        <div style="flex: 1;">{{ tournament.start_date }}</div>
+        <div style="flex: 2;">{{ tournament.tournament_name }}</div>
+        <div style="flex: 1;">
+            <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
+                <button type="submit">Dołącz</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+  
+</form>
+</div>
+</body>
+</html>
