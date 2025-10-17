@@ -76,6 +76,16 @@ class TournamentRepository:
         data["creator_id"] = current_user_id
         print(data)
         response = self._db.table(TOURNAMENT_TABLE).insert(data).execute()
+        
+        if response.data:
+            tournament_id = response.data[0]["id"]
+            participant_data = {
+                "tournament_id": tournament_id,
+                "invitee": current_user_id,
+                "status": "accepted"
+            }
+            self._db.table(TOURNAMENT_REQUEST_TABLE).insert(participant_data).execute()
+        
         return response.data or []
     
     def update_tournament(self, form: Tournament_edit, current_user_id: str):
@@ -85,6 +95,7 @@ class TournamentRepository:
             self._db.table(TOURNAMENT_TABLE)
             .update(data)
             .eq("creator_id", current_user_id)
+            .eq("id", form.id)  # Add specific tournament ID filter
             .execute()
         )
         return response.data or []
@@ -123,7 +134,7 @@ class TournamentRepository:
         return bool(response.data)
     
     def create_invitation(self, tournament_id, invitee_id):
-        data = {"tournament_id": tournament_id, "invitee": invitee_id}
+        data = {"tournament_id": tournament_id, "invitee": invitee_id, "status": "pending"}
         response = self._db.table(TOURNAMENT_REQUEST_TABLE).insert(data).execute()
         return response.data or []
     
@@ -167,3 +178,75 @@ class TournamentRepository:
 
         result = [t for t in tournaments if t["id"] not in invited_ids]
         return result
+
+    def get_tournament_participants(self, tournament_id: str):
+        # Get tournament creator info
+        tournament_data = (
+            self._db.table(USER_TOURNAMENT_VIEW)
+            .select("creator_username, created_at")
+            .eq("id", tournament_id)
+            .execute()
+        )
+        
+        participants = []
+        if tournament_data.data:
+            creator_data = tournament_data.data[0]
+            participants.append({
+                "username": creator_data["creator_username"],
+                "role": "creator",
+                "joined_at": creator_data.get("created_at")
+            })
+        
+        # Get accepted participants
+        accepted_participants = (
+            self._db.table(INVITATION_VIEW)
+            .select("invitee_username, created_at")
+            .eq("tournament_id", tournament_id)
+            .eq("status", "accepted")
+            .execute()
+        )
+        
+        for participant in (accepted_participants.data or []):
+            participants.append({
+                "username": participant["invitee_username"],
+                "role": "participant",
+                "joined_at": participant["created_at"]
+            })
+        
+        return participants
+
+    def get_tournament_matches(self, tournament_id: str):
+        matches = (
+            self._db.table("matches")
+            .select("*")
+            .eq("tournament_id", tournament_id)
+            .order("date")
+            .execute()
+        )
+        
+        return matches.data or []
+
+    def is_user_enrolled_in_tournament(self, tournament_id: str, user_id: str) -> bool:
+        # Check if user is creator
+        creator_check = (
+            self._db.table(TOURNAMENT_TABLE)
+            .select("id")
+            .eq("id", tournament_id)
+            .eq("creator_id", user_id)
+            .execute()
+        )
+        
+        if creator_check.data:
+            return True
+        
+        # Check if user has accepted invitation
+        participant_check = (
+            self._db.table(TOURNAMENT_REQUEST_TABLE)
+            .select("id")
+            .eq("tournament_id", tournament_id)
+            .eq("invitee", user_id)
+            .eq("status", "accepted")
+            .execute()
+        )
+        
+        return bool(participant_check.data)

@@ -37,7 +37,7 @@ def login_page_post(request: Request, email: str = Form(...), password: str = Fo
 
 @router.get("/register", response_class=HTMLResponse)
 def register_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("register.html", {"request": request})
 
 
 @router.post("/register", response_class=HTMLResponse)

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szczegóły Turnieju - Tournament Browser</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/tournament.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Szczegóły Turnieju</h1>
+            <p>Informacje o turnieju i zarządzanie uczestnikami</p>
+        </div>
+
+        {% if message %}
+            <div class="message {% if 'error' in message %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endif %}
+
+        <div class="tournament-details">
+            <h1>{{ tournament.tournament_name }}</h1>
+            
+            <div class="tournament-info-grid">
+                <div class="info-card">
+                    <h3>Data startu</h3>
+                    <p>{{ tournament.start_date }}</p>
+                </div>
+                <div class="info-card">
+                    <h3>Twórca</h3>
+                    <p>{{ tournament.creator_username }}</p>
+                </div>
+                <div class="info-card">
+                    <h3>Status</h3>
+                    <p>{{ tournament.status }}</p>
+                </div>
+                <div class="info-card">
+                    <h3>Typ</h3>
+                    <p>{{ 'Publiczny' if tournament.public else 'Prywatny' }}</p>
+                </div>
+            </div>
+
+            <div class="participants-section">
+                <h2>Uczestnicy ({{ participants|length }})</h2>
+                <div class="participants-list">
+                    {% for participant in participants %}
+                    <div class="participant-tag {% if participant.user_id == tournament.creator_id %}creator{% endif %}">
+                        {{ participant.username }}
+                        {% if participant.user_id == tournament.creator_id %}
+                            (Twórca)
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if can_manage %}
+            <div class="invite-section">
+                <h2>Zaproś znajomych</h2>
+                <form method="post" action="/tournament/{{ tournament.id }}/invite" class="invite-form">
+                    <div class="form-group">
+                        <label for="friends">Wybierz znajomych:</label>
+                        <select id="friends" name="friend_ids" multiple class="friends-select">
+                            {% for friend in friends %}
+                            <option value="{{ friend.user_id }}">{{ friend.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn success">Wyślij zaproszenia</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="tournament-actions">
+                <a href="/menu" class="btn">Powrót do menu</a>
+                {% if can_manage %}
+                <a href="/tournament/{{ tournament.id }}" class="btn warning">Edytuj turniej</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

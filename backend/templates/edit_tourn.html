@@ -1,114 +1,85 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <title>Dwa panele z listą i suwakiem</title>
-  <style>
-    .bottom_body {
-      display: flex;
-      justify-content: space-between;
-      margin: 20px;
-      font-family: sans-serif;
-    }
-    .panel {
-      width: 20%;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    select {
-      width: 100%;
-      height: 120px;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edytuj Turniej - Tournament Browser</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/tournament.css">
 </head>
 <body>
-    {% if message %}
-        <div style="background-color: #ffe5e5; color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-            {{ message }}
+    <div class="container">
+        <div class="header">
+            <h1>Edytuj Turniej</h1>
+            <p>Zaktualizuj dane turnieju</p>
         </div>
-    {% endif %}
 
-    <!-- <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;"> -->
-    <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
-        <div style="flex: 1;">Data startu</div>
-        <div style="flex: 2;">Nazwa</div>
-        <div style="flex: 1;">Publiczny?</div>
-        <div style="flex: 1;"></div>
-    </div>
+        {% if message %}
+            <div class="message {% if 'error' in message %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endif %}
 
-    <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
-        <div style="flex: 1;">{{ tournament_data.start_date }}</div>
-        <div style="flex: 2;">{{ tournament_data.name }}</div>
-        <div style="flex: 1;">{{ 'Tak' if tournament_data.public else 'Nie' }}</div>
-        <div style="flex: 1;">
+        <div class="tournament-container">
+            <div class="tournament-header">
+                <h2 class="tournament-title">Aktualne dane turnieju</h2>
+                <div class="tournament-actions">
+                    <a href="/tournament/" class="btn">Powrót do listy</a>
+                </div>
+            </div>
+
+            <div class="tournament-list">
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-row">
+                            <div class="table-cell">Data startu</div>
+                            <div class="table-cell">Nazwa</div>
+                            <div class="table-cell">Publiczny?</div>
+                            <div class="table-cell">Akcja</div>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="tournament-item">
+                            <div class="tournament-info">
+                                <div class="tournament-date">{{ tournament_data.start_date }}</div>
+                                <div class="tournament-name">{{ tournament_data.name }}</div>
+                                <div class="tournament-visibility {% if tournament_data.public %}public{% else %}private{% endif %}">
+                                    {{ 'Tak' if tournament_data.public else 'Nie' }}
+                                </div>
+                            </div>
+                            <div class="tournament-item-actions">
+                                <!-- Brak akcji dla wyświetlania -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="create-tournament-form">
+                <h1>Edytuj dane turnieju</h1>
+                <form method="POST" action="/tournament/{{ tournament_data.id }}/update">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Nazwa turnieju:</label>
+                            <input id="name" value="{{ new_name or tournament_data.name }}" type="text" name="name" placeholder="Wpisz nazwę" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="start_date">Data startu:</label>
+                            <input id="start_date" value="{{ new_start_date_str or tournament_data.start_date }}" type="datetime-local" name="start_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="public" {% if new_public is not none %}{% if new_public %}checked{% endif %}{% elif tournament_data.public %}checked{% endif %}>
+                                Publiczny
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn success">Zapisz zmiany</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-
-
-    <h1>Edit tournament data</h1>  
-    <form method="POST" action="/tournament/{{ tournament_data.id }}/update" >
-        <input value="{{ new_name }}" type="text" name="name" placeholder="{{tournament_data.name}}">
-        <input value="{{ new_start_date_str }}" type="datetime-local" name="start_date" >
-        <label>
-            <input type="checkbox" name="public" {% if public %}checked{% endif %}>
-            Publiczny
-        </label>
-        <button type="submit">Zapisz</button>
-    </form>
-
-   <div class="bottom_body" >
-  <!-- Lewy panel -->
-  <div class="panel">
-    <label>Uczestnicy turnieju</label>
-    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
-        <ul style="list-style-type: none; padding: 0; margin: 0;">
-            {% for username in participants %}
-                <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span>{{ username }}</span>
-                    <form method="post" action="/tournament/{{tournament_data.id}}/delate_user" style="margin: 0;">
-                        <input type="hidden" name="username_to_delete" value="{{ username }}">
-                        <button type="submit">Usuń</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <br><br>
-
-  </div>
-
-  <!-- Prawy panel -->
-  <div class="panel">
-
-    <label>Wysłane zaproszenia</label>
-    <select multiple>
-      {% for username in invitations_send %}
-        <option>{{ username }}</option>
-      {% endfor %}
-    </select>
-    <br><br>
-
-    <label>Zaproś znajomego</label>
-    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
-        <ul style="list-style-type: none; padding: 0; margin: 0;">
-            {% for username in search_results %}
-                <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span>{{ username }}</span>
-                    <form method="post" action="/tournament/{{ tournament_data.id }}/invite" style="margin: 0;">
-                        <input type="hidden" name="username_to_invite" value="{{ username }}">
-                        <button type="submit">Zaproś</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <form method="get" action="/tournament/{{ tournament_data.id }}">
-      
-      <input value="{{ username_search or '' }}" type="text" name="username_search" placeholder="Wpisz nazwę użytkownika">
-      <button type="submit">Szukaj</button>
-    </form>
-  </div>
-</div>
 </body>
 </html>

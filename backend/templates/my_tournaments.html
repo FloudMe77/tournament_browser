@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnieje, w których uczestniczę - Tournament Browser</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/tournament.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Turnieje, w których uczestniczę</h1>
+            <p>Przeglądaj turnieje, do których dołączyłeś</p>
+        </div>
+
+        {% if message %}
+            <div class="message {% if 'error' in message %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endif %}
+
+        <div class="tournament-container">
+            <div class="tournament-header">
+                <h2 class="tournament-title">Lista turniejów</h2>
+                <div class="tournament-actions">
+                    <a href="/menu" class="btn">Powrót do menu</a>
+                </div>
+            </div>
+
+            <div class="tournament-list">
+                {% if tournaments %}
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-row">
+                                <div class="table-cell">Data startu</div>
+                                <div class="table-cell">Nazwa</div>
+                                <div class="table-cell">Status</div>
+                                <div class="table-cell">Uczestnicy</div>
+                                <div class="table-cell">Akcja</div>
+                            </div>
+                        </div>
+                        <div class="table-content">
+                            {% for tournament in tournaments %}
+                            <div class="tournament-item">
+                                <div class="tournament-info">
+                                    <div class="tournament-date">{{ tournament.start_date }}</div>
+                                    <div class="tournament-name">{{ tournament.tournament_name }}</div>
+                                    <div class="tournament-visibility {% if tournament.status == 'upcoming' %}public{% else %}private{% endif %}">
+                                        {{ tournament.status }}
+                                    </div>
+                                    <div class="tournament-meta">
+                                        {{ tournament.participant_count or 0 }} uczestników
+                                    </div>
+                                </div>
+                                <div class="tournament-item-actions">
+                                    <form method="get" action="/tournament/{{ tournament.id }}/details" style="margin: 0;">
+                                        <button type="submit" class="btn small">Szczegóły</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="message info">
+                        <p>Nie uczestniczysz jeszcze w żadnych turniejach.</p>
+                        <p><a href="/tournament_list/" class="btn warning">Przeglądaj dostępne turnieje</a></p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

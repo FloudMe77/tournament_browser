@@ -168,3 +168,70 @@ def edit_tournament(request: Request,
             "request": request,
             "message": f"Wystąpił błąd: {str(e)}",
         })
+
+@router.get("/{tournament_id}/details", response_class=HTMLResponse)
+def tournament_details(request: Request,
+                     tournament_id: str,
+                     db=Depends(get_db), 
+                     current_user=Depends(get_current_user)):
+    try:
+        # Check if user has access to this tournament
+        tournament_data = safe_get(ts.get_tournament, db=db, tournament_id=tournament_id, current_user=current_user)
+        if not tournament_data:
+            return templates.TemplateResponse("error.html", {
+                "request": request,
+                "message": "Nie masz dostępu do tego turnieju",
+            })
+        
+        tournament = tournament_data[0]
+        
+        # Get participants
+        participants = safe_get(ts.get_tournament_participants, db=db, tournament_id=tournament_id)
+        
+        # Get matches if any
+        matches = safe_get(ts.get_tournament_matches, db=db, tournament_id=tournament_id)
+        
+        context = {
+            "request": request,
+            "tournament": tournament,
+            "participants": participants,
+            "matches": matches,
+            "current_user": current_user
+        }
+        
+        return templates.TemplateResponse("tournament_details.html", context)
+    except Exception as e:
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "message": f"Wystąpił błąd: {str(e)}",
+        })
+
+@router.get("/api/{tournament_id}/details")
+def tournament_details_api(tournament_id: str, db=Depends(get_db), current_user=Depends(get_current_user)):
+    """API endpoint to get tournament details with participants"""
+    try:
+        # Check if user has access to this tournament
+        tournament_data = safe_get(ts.get_tournament, db=db, tournament_id=tournament_id, current_user=current_user)
+        if not tournament_data:
+            raise HTTPException(status_code=403, detail="Nie masz dostępu do tego turnieju")
+        
+        tournament = tournament_data[0]
+        
+        # Get participants
+        participants = safe_get(ts.get_tournament_participants, db=db, tournament_id=tournament_id)
+        
+        # Get matches if any
+        matches = safe_get(ts.get_tournament_matches, db=db, tournament_id=tournament_id)
+        
+        return {
+            "status": "success",
+            "data": {
+                "tournament": tournament,
+                "participants": participants,
+                "matches": matches
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Wystąpił błąd: {str(e)}")

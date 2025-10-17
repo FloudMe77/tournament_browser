@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logowanie - Tournament Browser</title>
+    <title>Rejestracja - Tournament Browser</title>
     <link rel="stylesheet" href="/static/styles/main.css">
     <link rel="stylesheet" href="/static/styles/auth.css">
 </head>
@@ -11,7 +11,7 @@
     <div class="auth-container">
         <div class="auth-header">
             <h1>Tournament Browser</h1>
-            <p>Zaloguj się do swojego konta</p>
+            <p>Utwórz nowe konto</p>
         </div>
 
         {% if message %}
@@ -20,7 +20,7 @@
             </div>
         {% endif %}
 
-        <form method="post" action="/user/login" class="auth-form">
+        <form method="post" action="/user/register" class="auth-form">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input id="email" value="{{email or ''}}" type="email" name="email" placeholder="Wpisz email" required>
@@ -29,7 +29,7 @@
                 <label for="password">Hasło:</label>
                 <input id="password" value="{{password or ''}}" type="password" name="password" placeholder="Wpisz hasło" required>
             </div>
-            <button type="submit" class="btn">Zaloguj</button>
+            <button type="submit" class="btn">Zarejestruj</button>
         </form>
 
         <div class="auth-divider">
@@ -37,7 +37,7 @@
         </div>
 
         <div class="auth-links">
-            <a href="/user/register">Nie masz konta? Zarejestruj się</a>
+            <a href="/user/login">Masz już konto? Zaloguj się</a>
         </div>
     </div>
 </body>

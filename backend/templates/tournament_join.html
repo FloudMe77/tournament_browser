@@ -1,81 +1,70 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <title>Dwa panele z listą i suwakiem</title>
-  <style>
-    .bottom_body {
-      display: flex;
-      justify-content: space-between;
-      margin: 20px;
-      font-family: sans-serif;
-    }
-    .panel {
-      width: 20%;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    select {
-      width: 100%;
-      height: 120px;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dołącz do Turnieju - Tournament Browser</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/tournament.css">
 </head>
 <body>
-    {% if message %}
-        <div style="background-color: #ffe5e5; color: red; padding: 10px; border: 1px solid red; margin-bottom: 20px;">
-            {{ message }}
+    <div class="container">
+        <div class="header">
+            <h1>Dołącz do Turnieju</h1>
+            <p>Przeglądaj dostępne turnieje i dołącz do nich</p>
         </div>
-    {% endif %}
-    <h1>Zaproszenia</h1>  
-  <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
-    <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
-        <div style="flex: 1;">Data startu</div>
-        <div style="flex: 2;">Nazwa</div>
-        <div style="flex: 1;">Twórca</div>
-        <div style="flex: 1;">Akcja</div>
-    </div>
 
-    {% for tournament in invatation_tournament%}
-    <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
-        <div style="flex: 1;">{{ tournament.start_date }}</div>
-        <div style="flex: 2;">{{ tournament.name }}</div>
-        <div style="flex: 1;">{{ tournament.creator_username }}</div>
-        <div style="flex: 1;">
-            <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
-                <button type="submit">Dołącz</button>
-            </form>
-            <form method="post" action="/tournament_list/{{ tournament.id }}/reject" style="margin: 0;">
-                <button type="submit">Odrzuć</button>
-            </form>
+        {% if message %}
+            <div class="message {% if 'error' in message %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endif %}
+
+        <div class="tournament-container">
+            <div class="tournament-header">
+                <h2 class="tournament-title">Dostępne turnieje</h2>
+                <div class="tournament-actions">
+                    <a href="/menu" class="btn">Powrót do menu</a>
+                </div>
+            </div>
+
+            <div class="available-tournaments">
+                {% if tournaments %}
+                    {% for tournament in tournaments %}
+                    <div class="tournament-card {% if tournament.has_invitation %}invitation-card{% endif %}">
+                        <h3>{{ tournament.tournament_name }}</h3>
+                        <div class="meta">
+                            <strong>Data startu:</strong> {{ tournament.start_date }}<br>
+                            <strong>Twórca:</strong> {{ tournament.creator_username }}<br>
+                            <strong>Uczestnicy:</strong> {{ tournament.participant_count or 0 }}<br>
+                            <strong>Status:</strong> {{ tournament.status }}
+                        </div>
+                        <div class="actions">
+                            {% if tournament.has_invitation %}
+                                <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
+                                    <button type="submit" class="btn success">Zaakceptuj zaproszenie</button>
+                                </form>
+                                <form method="post" action="/tournament_list/{{ tournament.id }}/decline" style="margin: 0;">
+                                    <button type="submit" class="btn danger">Odrzuć zaproszenie</button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="/tournament_list/{{ tournament.id }}/join" style="margin: 0;">
+                                    <button type="submit" class="btn success">Dołącz</button>
+                                </form>
+                            {% endif %}
+                            <form method="get" action="/tournament/{{ tournament.id }}/details" style="margin: 0;">
+                                <button type="submit" class="btn">Szczegóły</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="message info">
+                        <p>Brak dostępnych turniejów do wyświetlenia.</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-    {% endfor %}
-    </div>
-    <h1>Publiczne</h1>  
-  <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
-    <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
-        <div style="flex: 1;">Data startu</div>
-        <div style="flex: 2;">Nazwa</div>
-        <div style="flex: 1;">Twórca</div>
-        <div style="flex: 1;"></div>
-    </div>
-
-    {% for tournament in public_tournament %}
-    <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
-        <div style="flex: 1;">{{ tournament.start_date }}</div>
-        <div style="flex: 2;">{{ tournament.tournament_name }}</div>
-        <div style="flex: 1;">{{ tournament.creator_username }}</div>
-        <div style="flex: 1;">
-            <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
-                <button type="submit">Dołącz</button>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
-
-  
-</form>
-</div>
 </body>
 </html>

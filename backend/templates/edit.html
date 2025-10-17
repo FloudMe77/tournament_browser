@@ -1,23 +1,49 @@
 <!DOCTYPE html>
 <html lang="pl">
-  <head>
+<head>
     <meta charset="UTF-8">
-    <title>Edycja profilu</title>
-  </head>
-  <body>
-    <main>
-      <h1>Edycja profilu</h1>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edycja profilu - Tournament Browser</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/auth.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edycja profilu</h1>
+            <p>Zaktualizuj swoje dane</p>
+        </div>
 
-      {% if message %}
-        <p style="color: red;">{{ message }}</p>
-      {% endif %}
+        {% if message %}
+            <div class="message {% if 'error' in message %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endif %}
 
-      <form method="post" action="/user/edit">
-        <input value="{{ email or '' }}" type="text" name="email" placeholder="Wpisz email">
-        <input value="{{ username or '' }}" type="text" name="username" placeholder="Wpisz username">
-        <input value="{{ avatar_url or '' }}" type="text" name="avatar_url" placeholder="Wpisz avatar_url">
-        <button type="submit">Aktualizuj</button>
-      </form>
-    </main>
-  </body>
+        <div class="edit-profile-form">
+            <div class="form-container">
+                <h1>Dane użytkownika</h1>
+                
+                <form method="post" action="/user/edit">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input id="email" value="{{ email or '' }}" type="email" name="email" placeholder="Wpisz email">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Nazwa użytkownika:</label>
+                        <input id="username" value="{{ username or '' }}" type="text" name="username" placeholder="Wpisz nazwę użytkownika">
+                    </div>
+                    <div class="form-group">
+                        <label for="avatar_url">URL awatara:</label>
+                        <input id="avatar_url" value="{{ avatar_url or '' }}" type="url" name="avatar_url" placeholder="Wpisz URL awatara">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn success">Aktualizuj</button>
+                        <a href="/menu" class="btn">Powrót do menu</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
