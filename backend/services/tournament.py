@@ -73,7 +73,19 @@ def invite_user(db: Client, other_nickname: str, tournament_id:str) -> Dict[str,
     created = tournamentRepository.create_invitation(tournament_id=tournament_id, invitee_id=other_id)
     return {"status": "ok", "get": created}
 
+
+
 def get_posted_invitation_users(db: Client, tournament_id):
     tournamentRepository = TournamentRepository(db)
     posted_invitation_users = tournamentRepository.get_posted_invitation_users(tournament_id=tournament_id)
+    return {"status": "ok", "get": posted_invitation_users}
+
+def get_invitations(db: Client, current_user):
+    tournamentRepository = TournamentRepository(db)
+    posted_invitation_users = tournamentRepository.get_invitations(current_user_id= current_user.id)
+    return {"status": "ok", "get": posted_invitation_users}
+
+def get_public_tournaments(db: Client, current_user):
+    tournamentRepository = TournamentRepository(db)
+    posted_invitation_users = tournamentRepository.get_public_tournament(current_user_id= current_user.id)
     return {"status": "ok", "get": posted_invitation_users}

@@ -32,13 +32,15 @@
     <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
         <div style="flex: 1;">Data startu</div>
         <div style="flex: 2;">Nazwa</div>
+        <div style="flex: 1;">Twórca</div>
         <div style="flex: 1;">Akcja</div>
     </div>
 
     {% for tournament in invatation_tournament%}
     <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
         <div style="flex: 1;">{{ tournament.start_date }}</div>
-        <div style="flex: 2;">{{ tournament.tournament_name }}</div>
+        <div style="flex: 2;">{{ tournament.name }}</div>
+        <div style="flex: 1;">{{ tournament.creator_username }}</div>
         <div style="flex: 1;">
             <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
                 <button type="submit">Dołącz</button>
@@ -55,6 +57,7 @@
     <div style="display: flex; font-weight: bold; margin-bottom: 5px;">
         <div style="flex: 1;">Data startu</div>
         <div style="flex: 2;">Nazwa</div>
+        <div style="flex: 1;">Twórca</div>
         <div style="flex: 1;"></div>
     </div>
 
@@ -62,6 +65,7 @@
     <div style="display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding: 3px 0;">
         <div style="flex: 1;">{{ tournament.start_date }}</div>
         <div style="flex: 2;">{{ tournament.tournament_name }}</div>
+        <div style="flex: 1;">{{ tournament.creator_username }}</div>
         <div style="flex: 1;">
             <form method="post" action="/tournament_list/{{ tournament.id }}/accept" style="margin: 0;">
                 <button type="submit">Dołącz</button>

@@ -136,3 +136,34 @@ class TournamentRepository:
             .execute()
         )
         return [row["invitee_username"] for row in (response.data or [])]
+    
+    def get_invitations(self, current_user_id):
+        response = (
+            self._db.table(INVITATION_VIEW)
+            .select("*")
+            .eq("invitee", current_user_id)
+            .eq("status", "pending")
+            .execute()
+        )
+        return response.data
+    
+    def get_public_tournament(self, current_user_id: str):
+        tournaments = (
+            self._db.table(USER_TOURNAMENT_VIEW)
+            .select("*")
+            .eq("public", True)
+            .execute()
+        ).data
+
+        invitations = (
+            self._db.table(INVITATION_VIEW)
+            .select("tournament_id, status")
+            .eq("invitee", current_user_id)
+            .in_("status", ["pending", "accepted"])
+            .execute()
+        ).data
+
+        invited_ids = {inv["tournament_id"] for inv in invitations}
+
+        result = [t for t in tournaments if t["id"] not in invited_ids]
+        return result
